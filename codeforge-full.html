@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeForge Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Clash+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Core palette */
+  --ink:     #04060d;
+  --ink2:    #080d1a;
+  --ink3:    #0d1424;
+
+  --blue:    #3b82f6;
+  --blue2:   #60a5fa;
+  --violet:  #7c3aed;
+  --violet2: #a78bfa;
+  --cyan:    #06b6d4;
+  --cyan2:   #67e8f9;
+  --green:   #10b981;
+  --green2:  #6ee7b7;
+  --amber:   #f59e0b;
+  --amber2:  #fcd34d;
+  --rose:    #f43f5e;
+  --rose2:   #fda4af;
+
+  --white:   #ffffff;
+  --off:     #f1f5f9;
+  --muted:   #94a3b8;
+  --dim:     #475569;
+
+  --r:    10px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+
+  --mono: 'JetBrains Mono', monospace;
+  --display: 'Plus Jakarta Sans', sans-serif;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--display);
+  background: var(--ink);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════════ */
+#landing {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animated mesh background */
+.mesh-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 900px 700px at 10% -10%, rgba(124,58,237,0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 500px at 90% 20%,  rgba(59,130,246,0.3)  0%, transparent 60%),
+    radial-gradient(ellipse 600px 600px at 50% 80%,  rgba(6,182,212,0.2)   0%, transparent 60%),
+    radial-gradient(ellipse 800px 400px at 80% 100%, rgba(16,185,129,0.15) 0%, transparent 60%);
+  animation: meshDrift 12s ease-in-out infinite alternate;
+}
+@keyframes meshDrift {
+  0%   { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(20deg); }
+}
+
+/* Grid lines */
+.grid-lines {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Floating code cards */
+.float-cards {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  overflow: hidden;
+}
+.fcard {
+  position: absolute;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--r-lg);
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.5);
+  backdrop-filter: blur(8px);
+  animation: floatUp 20s linear infinite;
+}
+.fcard:nth-child(1) { left: 3%;  top: 20%; animation-delay: 0s;    animation-duration: 18s; }
+.fcard:nth-child(2) { right: 4%; top: 15%; animation-delay: -5s;   animation-duration: 22s; }
+.fcard:nth-child(3) { left: 1%;  top: 60%; animation-delay: -10s;  animation-duration: 16s; }
+.fcard:nth-child(4) { right: 2%; top: 55%; animation-delay: -3s;   animation-duration: 20s; }
+
+@keyframes floatUp {
+  0%   { transform: translateY(0px)   rotate(-1deg); opacity: 0.5; }
+  50%  { transform: translateY(-24px) rotate(1deg);  opacity: 0.8; }
+  100% { transform: translateY(0px)   rotate(-1deg); opacity: 0.5; }
+}
+
+.fc-kw  { color: #c792ea; }
+.fc-fn  { color: #82aaff; }
+.fc-str { color: #c3e88d; }
+.fc-cm  { color: #546e7a; }
+.fc-num { color: #f78c6c; }
+
+/* NAV */
+.nav {
+  position: relative; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
+  text-decoration: none; color: var(--white);
+}
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 24px rgba(124,58,237,0.5);
+}
+.nav-links { display: flex; align-items: center; gap: 32px; }
+.nav-link {
+  font-size: 14px; font-weight: 600; color: var(--muted);
+  text-decoration: none; transition: color 0.2s;
+}
+.nav-link:hover { color: var(--white); }
+.nav-cta {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: var(--r);
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  color: var(--white); cursor: pointer; transition: all 0.2s;
+  text-decoration: none;
+}
+.nav-cta:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.25); }
+
+/* HERO */
+.hero {
+  position: relative; z-index: 10;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 24px 60px;
+  text-align: center;
+  flex: 1;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 99px;
+  background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.35);
+  font-size: 12px; font-weight: 700; color: var(--blue2);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  margin-bottom: 28px;
+  animation: fadeDown 0.6s var(--ease) both;
+}
+.badge-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--blue);
+  animation: badgePulse 2s ease infinite;
+}
+@keyframes badgePulse { 0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,0.4)} 50%{box-shadow:0 0 0 6px rgba(59,130,246,0)} }
+
+.hero-title {
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  max-width: 900px;
+  margin-bottom: 24px;
+  animation: fadeDown 0.6s 0.1s var(--ease) both;
+}
+.hero-title .grad {
+  background: linear-gradient(135deg, var(--blue2) 0%, var(--violet2) 50%, var(--cyan2) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradShift 4s ease infinite;
+}
+@keyframes gradShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
+
+.hero-sub {
+  font-size: 19px; font-weight: 500;
+  color: rgba(255,255,255,0.65);
+  max-width: 560px; line-height: 1.6;
+  margin-bottom: 44px;
+  animation: fadeDown 0.6s 0.2s var(--ease) both;
+}
+
+.hero-actions {
+  display: flex; align-items: center; gap: 14px;
+  animation: fadeDown 0.6s 0.3s var(--ease) both;
+}
+
+.btn-primary {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 32px; border-radius: var(--r-lg);
+  background: linear-gradient(135deg, var(--blue), var(--violet));
+  border: none; font-family: var(--display);
+  font-size: 15px; font-weight: 800; color: var(--white);
+  cursor: pointer; transition: all 0.2s var(--ease);
+  box-shadow: 0 8px 32px rgba(124,58,237,0.45), 0 0 0 1px rgba(255,255,255,0.1) inset;
+  position: relative; overflow: hidden;
+  text-decoration: none;
+}
+.btn-primary::before {
+  content:''; position:absolute; inset:0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18), transparent);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(124,58,237,0.6), 0 0 0 1px rgba(255,255,255,0.15) inset; }
+.btn-primary:active { transform: translateY(0); }
+
+.btn-secondary {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 28px; border-radius: var(--r-lg);
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.18);
+  font-family: var(--display); font-size: 15px; font-weight: 700;
+  color: rgba(255,255,255,0.9); cursor: pointer; transition: all 0.2s;
+  text-decoration: none;
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.11); border-color: rgba(255,255,255,0.28); }
+
+/* HERO VISUAL — editor mockup */
+.hero-visual {
+  position: relative; z-index: 10;
+  margin: 60px auto 0;
+  max-width: 960px; width: 100%;
+  padding: 0 24px;
+  animation: fadeUp 0.8s 0.4s var(--ease) both;
+}
+
+.mockup-frame {
+  background: rgba(13,20,36,0.9);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow:
+    0 40px 100px rgba(0,0,0,0.7),
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 0 80px rgba(59,130,246,0.12);
+  backdrop-filter: blur(20px);
+}
+
+.mockup-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+.mbar-dots { display: flex; gap: 6px; }
+.mbar-dot { width: 11px; height: 11px; border-radius: 50%; }
+.mbar-dot:nth-child(1){ background: #ff5f57; }
+.mbar-dot:nth-child(2){ background: #febc2e; }
+.mbar-dot:nth-child(3){ background: #28c840; }
+.mbar-title {
+  margin: 0 auto;
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35);
+  font-family: var(--mono); letter-spacing: 0.3px;
+}
+
+.mockup-body {
+  display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 320px;
+}
+.mockup-left {
+  padding: 20px 22px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.mock-prompt-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.mock-tag {
+  background: rgba(59,130,246,0.2); color: var(--blue2);
+  padding: 2px 7px; border-radius: 4px; font-size: 9px; font-weight: 700;
+}
+.mock-prompt-text {
+  font-size: 13px; font-weight: 500;
+  color: rgba(255,255,255,0.85); line-height: 1.7;
+  font-family: var(--mono);
+}
+.mock-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.mock-pill {
+  padding: 4px 10px; border-radius: 99px;
+  font-size: 10px; font-weight: 700;
+  border: 1px solid;
+}
+.pill-blue  { color: var(--blue2);   border-color: rgba(59,130,246,0.35);  background: rgba(59,130,246,0.1);  }
+.pill-cyan  { color: var(--cyan2);   border-color: rgba(6,182,212,0.35);   background: rgba(6,182,212,0.1);   }
+.pill-green { color: var(--green2);  border-color: rgba(16,185,129,0.35);  background: rgba(16,185,129,0.1);  }
+.pill-amber { color: var(--amber2);  border-color: rgba(245,158,11,0.35);  background: rgba(245,158,11,0.1);  }
+
+.mockup-right { padding: 20px 22px; font-family: var(--mono); font-size: 11.5px; line-height: 1.8; }
+.mr-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.mr-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+
+/* Blinking cursor */
+.cursor { display: inline-block; width: 8px; height: 14px; background: var(--blue); vertical-align: middle; animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Animations */
+@keyframes fadeDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadeUp   { from{opacity:0;transform:translateY(30px)}  to{opacity:1;transform:translateY(0)} }
+
+/* STATS BAR */
+.stats-bar {
+  position: relative; z-index: 10;
+  display: flex; align-items: center; justify-content: center; gap: 0;
+  padding: 32px 48px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  animation: fadeUp 0.6s 0.6s var(--ease) both;
+}
+.stat-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 0 40px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+}
+.stat-item:last-child { border-right: none; }
+.stat-num {
+  font-size: 32px; font-weight: 800; letter-spacing: -1px;
+  background: linear-gradient(135deg, var(--white), var(--muted));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+/* ═══════════════════════════════════════
+   FEATURES SECTION
+═══════════════════════════════════════ */
+#features {
+  padding: 100px 48px;
+  position: relative;
+  background: var(--ink2);
+}
+#features::before {
+  content:'';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124,58,237,0.5), rgba(59,130,246,0.5), transparent);
+}
+
+.section-label {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 11px; font-weight: 800; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--blue2); margin-bottom: 16px;
+}
+.section-line { width: 32px; height: 1px; background: var(--blue); }
+
+.section-title {
+  text-align: center; font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800; letter-spacing: -1.5px;
+  line-height: 1.1; margin-bottom: 16px;
+}
+.section-sub {
+  text-align: center; font-size: 17px; font-weight: 500;
+  color: rgba(255,255,255,0.55); max-width: 520px;
+  margin: 0 auto 64px; line-height: 1.6;
+}
+
+/* Feature grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.feat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--r-xl);
+  padding: 28px;
+  transition: all 0.25s var(--ease);
+  position: relative; overflow: hidden;
+  cursor: default;
+}
+.feat-card::before {
+  content:''; position:absolute; inset:0;
+  opacity: 0; transition: opacity 0.3s;
+  border-radius: inherit;
+}
+.feat-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
+.feat-card:hover::before { opacity: 1; }
+
+/* Card color themes */
+.feat-card.c-blue::before  { background: radial-gradient(circle at 0% 0%, rgba(59,130,246,0.08), transparent 60%); }
+.feat-card.c-violet::before{ background: radial-gradient(circle at 0% 0%, rgba(124,58,237,0.08), transparent 60%); }
+.feat-card.c-cyan::before  { background: radial-gradient(circle at 0% 0%, rgba(6,182,212,0.08), transparent 60%); }
+.feat-card.c-green::before { background: radial-gradient(circle at 0% 0%, rgba(16,185,129,0.08), transparent 60%); }
+.feat-card.c-amber::before { background: radial-gradient(circle at 0% 0%, rgba(245,158,11,0.08), transparent 60%); }
+.feat-card.c-rose::before  { background: radial-gradient(circle at 0% 0%, rgba(244,63,94,0.08), transparent 60%); }
+
+.feat-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.feat-icon-wrap svg { width: 24px; height: 24px; stroke-width: 1.8; }
+
+.ib { background: rgba(59,130,246,0.18);  color: var(--blue2);   }
+.iv { background: rgba(124,58,237,0.18);  color: var(--violet2); }
+.ic { background: rgba(6,182,212,0.18);   color: var(--cyan2);   }
+.ig { background: rgba(16,185,129,0.18);  color: var(--green2);  }
+.ia { background: rgba(245,158,11,0.18);  color: var(--amber2);  }
+.ir { background: rgba(244,63,94,0.18);   color: var(--rose2);   }
+
+.feat-title { font-size: 17px; font-weight: 800; margin-bottom: 10px; color: var(--white); }
+.feat-desc  { font-size: 14px; font-weight: 400; color: rgba(255,255,255,0.55); line-height: 1.65; }
+
+/* Feature card with screenshot mockup */
+.feat-card.wide {
+  grid-column: span 2;
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 24px; align-items: center;
+}
+.feat-card.tall { grid-row: span 2; display: flex; flex-direction: column; }
+.feat-screen {
+  background: rgba(4,6,13,0.8);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: var(--r-lg); overflow: hidden;
+  font-family: var(--mono); font-size: 11px; line-height: 1.7;
+}
+.fs-bar {
+  display: flex; gap: 5px; padding: 8px 12px;
+  background: rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.fs-dot { width: 8px; height: 8px; border-radius: 50%; }
+.fsd1{background:#ff5f57} .fsd2{background:#febc2e} .fsd3{background:#28c840}
+.fs-body { padding: 14px 16px; color: rgba(255,255,255,0.65); }
+.fs-lang-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.fs-lang {
+  padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 700;
+  border: 1px solid;
+}
+.fsl-py { color:#3776ab; border-color:rgba(55,118,171,0.4); background:rgba(55,118,171,0.12); }
+.fsl-js { color:#f7df1e; border-color:rgba(247,223,30,0.4);  background:rgba(247,223,30,0.12); }
+.fsl-ts { color:#3178c6; border-color:rgba(49,120,198,0.4);  background:rgba(49,120,198,0.12); }
+.fsl-rs { color:#ce422b; border-color:rgba(206,66,43,0.4);   background:rgba(206,66,43,0.12);  }
+.fsl-go { color:#00add8; border-color:rgba(0,173,216,0.4);   background:rgba(0,173,216,0.12);  }
+.fsl-sw { color:#fa7343; border-color:rgba(250,115,67,0.4);  background:rgba(250,115,67,0.12); }
+
+/* ═══════════════════════════════════════
+   LANGUAGES SECTION
+═══════════════════════════════════════ */
+#langs {
+  padding: 80px 48px;
+  background: var(--ink3);
+  position: relative;
+}
+#langs::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, rgba(6,182,212,0.5), rgba(16,185,129,0.4), transparent);
+}
+
+.langs-strip {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  justify-content: center; max-width: 900px; margin: 48px auto 0;
+}
+.lang-badge {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 18px; border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.04);
+  font-size: 13px; font-weight: 700;
+  transition: all 0.2s var(--ease);
+  cursor: default;
+}
+.lang-badge:hover { transform: scale(1.06); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
+.lb-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* ═══════════════════════════════════════
+   CTA SECTION
+═══════════════════════════════════════ */
+#cta-section {
+  padding: 120px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+#cta-section::before {
+  content:''; position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 700px 500px at 50% 50%, rgba(124,58,237,0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 400px 300px at 30% 70%, rgba(59,130,246,0.15) 0%, transparent 60%);
+}
+.cta-inner { position: relative; z-index: 1; }
+.cta-title {
+  font-size: clamp(36px, 5vw, 64px); font-weight: 800;
+  letter-spacing: -2px; line-height: 1.1; margin-bottom: 20px;
+}
+.cta-sub {
+  font-size: 18px; font-weight: 500;
+  color: rgba(255,255,255,0.55); margin-bottom: 40px;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 12px;
+  padding: 18px 40px; border-radius: var(--r-xl);
+  background: linear-gradient(135deg, var(--blue), var(--violet), var(--cyan));
+  background-size: 200% 200%; animation: gradShift 3s ease infinite;
+  border: none; font-family: var(--display);
+  font-size: 17px; font-weight: 800; color: var(--white);
+  cursor: pointer; transition: all 0.2s var(--ease);
+  box-shadow: 0 12px 40px rgba(124,58,237,0.5);
+  position: relative; overflow: hidden;
+}
+.cta-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent); }
+.cta-btn:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(124,58,237,0.65); }
+.cta-btn svg { width: 22px; height: 22px; stroke-width: 2.5; }
+
+/* ═══════════════════════════════════════
+   STUDIO (HIDDEN UNTIL LAUNCHED)
+═══════════════════════════════════════ */
+#studio {
+  display: none;
+  height: 100vh;
+  flex-direction: column;
+  background: #080a10;
+  color: #f0f2f8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+#studio.active { display: flex; }
+
+/* --- Studio CSS vars --- */
+#studio {
+  --s-bg:      #080a10;
+  --s-bg2:     #0c0e18;
+  --s-sur:     #101422;
+  --s-sur2:    #161a28;
+  --s-sur3:    #1c2135;
+  --s-sur4:    #252b3d;
+  --s-bdr:     rgba(255,255,255,0.07);
+  --s-bdr2:    rgba(255,255,255,0.12);
+  --s-blue:    #4f8ef7;
+  --s-bdim:    rgba(79,142,247,0.14);
+  --s-violet:  #8b5cf6;
+  --s-cyan:    #22d3ee;
+  --s-green:   #34d399;
+  --s-gdim:    rgba(52,211,153,0.12);
+  --s-amber:   #fbbf24;
+  --s-red:     #f87171;
+  --s-text:    #f0f2f8;
+  --s-text2:   #8b9ab8;
+  --s-text3:   #3d4a65;
+}
+
+/* Studio scrollbar */
+#studio ::-webkit-scrollbar { width: 4px; }
+#studio ::-webkit-scrollbar-track { background: transparent; }
+#studio ::-webkit-scrollbar-thumb { background: var(--s-sur4); border-radius: 99px; }
+
+/* Studio topbar */
+.s-top {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 14px; height: 46px;
+  background: rgba(16,20,34,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--s-bdr);
+  flex-shrink: 0; z-index: 100;
+}
+.s-logo { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 800; letter-spacing: -0.5px; cursor: pointer; }
+.s-logo-icon {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--s-blue), var(--s-violet));
+  border-radius: 8px; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px rgba(79,142,247,0.3);
+}
+.s-logo-icon svg { width: 15px; height: 15px; stroke-width: 2; color: white; }
+.s-sep { width: 1px; height: 18px; background: var(--s-bdr2); }
+
+/* Studio lang pill */
+.s-lp { position: relative; }
+.s-lt {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px 5px 8px;
+  background: var(--s-sur2); border: 1px solid var(--s-bdr2);
+  border-radius: 8px; cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 700; color: var(--s-text);
+  transition: all 0.15s;
+}
+.s-lt:hover { background: var(--s-sur3); }
+.s-lt .ldot { width: 7px; height: 7px; border-radius: 50%; }
+.s-lt .larr { font-size: 8px; color: var(--s-text3); transition: transform 0.2s; }
+.s-lt.open .larr { transform: rotate(180deg); }
+
+.s-lm {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  background: var(--s-sur2); border: 1px solid var(--s-bdr2);
+  border-radius: 14px; padding: 6px; width: 210px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6); z-index: 999;
+  max-height: 380px; overflow-y: auto;
+}
+.s-lm.open { display: block; animation: smDrop 0.16s var(--ease); }
+@keyframes smDrop { from{opacity:0;transform:translateY(-8px) scale(0.97)} to{opacity:1;transform:none} }
+.s-lsec { padding: 6px 8px 2px; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--s-text3); text-transform: uppercase; }
+.s-lrow {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 9px; border-radius: 6px;
+  font-size: 12px; font-weight: 600; color: var(--s-text2);
+  cursor: pointer; transition: all 0.12s;
+}
+.s-lrow:hover { background: var(--s-sur3); color: var(--s-text); }
+.s-lrow.sel { background: var(--s-bdim); color: var(--s-blue); }
+.s-lrow .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.s-tr { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.s-tbtn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 8px;
+  background: none; border: 1px solid var(--s-bdr);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 600; color: var(--s-text2);
+  cursor: pointer; transition: all 0.15s;
+}
+.s-tbtn:hover { border-color: var(--s-bdr2); color: var(--s-text); background: var(--s-sur2); }
+.s-tbtn svg { width: 13px; height: 13px; stroke-width: 1.8; }
+
+.s-trun {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--s-blue), var(--s-violet)); border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; color: #fff;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 4px 16px rgba(79,142,247,0.3);
+}
+.s-trun:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,142,247,0.45); }
+.s-trun svg { width: 12px; height: 12px; stroke-width: 2.5; }
+
+/* Studio workspace */
+.s-work { display: flex; flex: 1; overflow: hidden; }
+
+/* Studio sidebar */
+.s-side {
+  width: 46px; background: rgba(16,20,34,0.8);
+  border-right: 1px solid var(--s-bdr);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 8px 0; gap: 3px; flex-shrink: 0;
+}
+.s-si {
+  width: 32px; height: 32px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--s-text3); transition: all 0.15s;
+  position: relative; border: none; background: none;
+}
+.s-si svg { width: 16px; height: 16px; stroke-width: 1.7; }
+.s-si:hover { background: var(--s-sur3); color: var(--s-text2); }
+.s-si.on { background: var(--s-bdim); color: var(--s-blue); }
+.s-si .tip {
+  position: absolute; left: calc(100% + 10px);
+  background: var(--s-sur3); border: 1px solid var(--s-bdr2);
+  border-radius: 6px; padding: 4px 8px;
+  font-size: 11px; font-weight: 600; white-space: nowrap; color: var(--s-text);
+  pointer-events: none; opacity: 0; transform: translateX(-4px); transition: all 0.14s; z-index: 999;
+}
+.s-si:hover .tip { opacity: 1; transform: translateX(0); }
+.s-sg { flex: 1; }
+.s-sl { width: 20px; height: 1px; background: var(--s-bdr); margin: 3px 0; }
+
+/* Studio file panel */
+.s-fp {
+  width: 218px; background: rgba(12,14,24,0.8);
+  border-right: 1px solid var(--s-bdr);
+  display: flex; flex-direction: column; flex-shrink: 0;
+  overflow: hidden; transition: width 0.22s var(--ease);
+}
+.s-fp.closed { width: 0; }
+.s-fph {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px; border-bottom: 1px solid var(--s-bdr); flex-shrink: 0;
+}
+.s-fpt { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--s-text3); text-transform: uppercase; }
+.s-fpa { display: flex; gap: 3px; }
+.s-fpab {
+  width: 22px; height: 22px; border-radius: 5px;
+  background: none; border: none; color: var(--s-text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: all 0.13s;
+}
+.s-fpab svg { width: 12px; height: 12px; stroke-width: 1.8; }
+.s-fpab:hover { background: var(--s-sur3); color: var(--s-text2); }
+.s-ft { flex: 1; overflow-y: auto; padding: 6px 4px; }
+.s-frow {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 6px;
+  font-size: 11.5px; font-weight: 500; color: var(--s-text2);
+  cursor: pointer; transition: all 0.12s; font-family: 'JetBrains Mono', monospace;
+}
+.s-frow svg { width: 12px; height: 12px; stroke-width: 1.7; flex-shrink: 0; }
+.s-frow:hover { background: var(--s-sur3); color: var(--s-text); }
+.s-frow.active { background: var(--s-bdim); color: var(--s-blue); }
+
+/* Studio editor */
+.s-ed { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+.s-tabs {
+  display: flex; align-items: flex-end;
+  background: var(--s-bg2); border-bottom: 1px solid var(--s-bdr);
+  height: 38px; flex-shrink: 0; overflow-x: auto; padding: 0 4px;
+}
+.s-tabs::-webkit-scrollbar { display: none; }
+.s-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; height: 100%;
+  font-size: 11.5px; font-weight: 500; color: var(--s-text3);
+  cursor: pointer; white-space: nowrap; font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0; position: relative; top: 1px;
+  border-top: 2px solid transparent; border-bottom: 2px solid transparent;
+  transition: color 0.12s;
+}
+.s-tab:hover { color: var(--s-text2); }
+.s-tab.on { color: var(--s-text); background: var(--s-bg); border-top-color: var(--s-blue); border-right: 1px solid var(--s-bdr); }
+.s-tab .tx { font-size: 13px; color: var(--s-text3); opacity: 0; transition: opacity 0.12s; }
+.s-tab:hover .tx, .s-tab.on .tx { opacity: 1; }
+.s-tab .tx:hover { color: var(--s-red); }
+.s-tmod { width: 6px; height: 6px; border-radius: 50%; background: var(--s-amber); flex-shrink: 0; }
+
+.s-panes { flex: 1; display: flex; overflow: hidden; }
+
+/* Input pane */
+.s-ip { display: flex; flex-direction: column; overflow: hidden; min-width: 0; flex: 1; }
+.s-pb {
+  display: flex; align-items: center; gap: 8px; padding: 7px 14px;
+  border-bottom: 1px solid var(--s-bdr);
+  background: rgba(12,14,24,0.6); flex-shrink: 0;
+}
+.s-pl { font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--s-text3); }
+.s-ptag {
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+  background: var(--s-bdim); color: var(--s-blue); font-family: 'JetBrains Mono', monospace;
+}
+.s-pbr { margin-left: auto; display: flex; gap: 5px; }
+.s-mb {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 6px;
+  background: none; border: 1px solid var(--s-bdr);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600;
+  color: var(--s-text3); cursor: pointer; transition: all 0.14s;
+}
+.s-mb svg { width: 11px; height: 11px; stroke-width: 2; }
+.s-mb:hover { border-color: var(--s-bdr2); color: var(--s-text2); background: var(--s-sur2); }
+
+.s-ar {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 7px 14px; border-bottom: 1px solid var(--s-bdr);
+  background: rgba(8,10,16,0.5); min-height: 38px; flex-shrink: 0;
+}
+.s-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 99px;
+  background: var(--s-sur3); border: 1px solid var(--s-bdr2);
+  font-size: 10.5px; font-weight: 600; color: var(--s-text2);
+  font-family: 'JetBrains Mono', monospace;
+}
+.s-chip svg { width: 11px; height: 11px; stroke-width: 1.8; }
+.s-cx { cursor: pointer; color: var(--s-text3); margin-left: 2px; }
+.s-cx:hover { color: var(--s-red); }
+.s-ab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 99px;
+  background: none; border: 1px dashed var(--s-bdr2);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10px; font-weight: 600;
+  color: var(--s-text3); cursor: pointer; transition: all 0.14s;
+}
+.s-ab svg { width: 11px; height: 11px; stroke-width: 2; }
+.s-ab:hover { border-color: var(--s-blue); color: var(--s-blue); }
+
+.s-pw { flex: 1; display: flex; flex-direction: column; background: var(--s-bg); overflow: hidden; }
+.s-psc { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+textarea.s-pt {
+  background: none; border: none; outline: none; resize: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 13.5px; line-height: 1.8;
+  color: var(--s-text); caret-color: var(--s-blue); min-height: 130px;
+}
+textarea.s-pt::placeholder { color: var(--s-text3); font-style: italic; }
+.s-cpills { display: flex; flex-wrap: wrap; gap: 5px; }
+.s-cpill {
+  padding: 4px 10px; border-radius: 99px; border: 1px solid var(--s-bdr);
+  background: none; font-size: 11px; font-weight: 600; color: var(--s-text3);
+  cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.14s;
+}
+.s-cpill:hover { border-color: var(--s-blue); color: var(--s-blue); background: var(--s-bdim); }
+
+.s-pf {
+  display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+  border-top: 1px solid var(--s-bdr);
+  background: rgba(12,14,24,0.7); flex-shrink: 0;
+}
+.s-tool {
+  width: 30px; height: 30px; border-radius: 7px;
+  background: none; border: none; color: var(--s-text3); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.13s; position: relative;
+}
+.s-tool svg { width: 15px; height: 15px; stroke-width: 1.7; }
+.s-tool:hover { background: var(--s-sur3); color: var(--s-text2); }
+.s-tool .tip {
+  position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
+  background: var(--s-sur3); border: 1px solid var(--s-bdr2);
+  border-radius: 6px; padding: 4px 8px;
+  font-size: 10px; font-weight: 600; white-space: nowrap; color: var(--s-text);
+  pointer-events: none; opacity: 0; transition: opacity 0.13s; z-index: 99;
+}
+.s-tool:hover .tip { opacity: 1; }
+.s-tsep { width: 1px; height: 18px; background: var(--s-bdr); margin: 0 2px; }
+.s-cct { font-size: 10px; color: var(--s-text3); font-family: 'JetBrains Mono', monospace; margin-left: 4px; }
+
+.s-gb {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 18px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--s-blue), var(--s-violet)); border: none;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 800; color: #fff;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 4px 20px rgba(79,142,247,0.3); position: relative; overflow: hidden;
+}
+.s-gb::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent); }
+.s-gb:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(79,142,247,0.5); }
+.s-gb.busy { opacity:0.6; pointer-events:none; }
+.s-gb svg { width: 13px; height: 13px; stroke-width: 2.5; position: relative; }
+
+/* Resizer */
+.s-sz { width: 3px; background: var(--s-bdr); cursor: col-resize; flex-shrink: 0; transition: background 0.15s; }
+.s-sz:hover, .s-sz.drag { background: var(--s-blue); }
+
+/* Output pane */
+.s-op { width: 50%; display: flex; flex-direction: column; overflow: hidden; min-width: 180px; }
+.s-ob {
+  display: flex; align-items: center; gap: 8px; padding: 7px 14px;
+  border-bottom: 1px solid var(--s-bdr);
+  background: rgba(12,14,24,0.6); flex-shrink: 0;
+}
+.s-sind { display: flex; align-items: center; gap: 6px; font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--s-text3); text-transform: uppercase; }
+.s-sd { width: 7px; height: 7px; border-radius: 50%; background: var(--s-text3); transition: background 0.3s; }
+.s-sd.rdy { background: var(--s-green); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+.s-sd.run { background: var(--s-amber); animation: sBl 0.9s ease infinite; }
+@keyframes sBl { 0%,100%{opacity:1} 50%{opacity:0.25} }
+.s-obr { margin-left: auto; display: flex; gap: 5px; align-items: center; }
+.s-lct { font-size: 10px; color: var(--s-text3); font-family: 'JetBrains Mono', monospace; }
+
+.s-cw { flex: 1; overflow-y: auto; background: var(--s-bg); position: relative; }
+.s-ci { padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; min-height: 100%; }
+.s-lnw { display: flex; gap: 16px; }
+.s-lnn { font-size: 12px; line-height: 1.8; color: var(--s-text3); user-select: none; flex-shrink: 0; min-width: 28px; text-align: right; }
+.s-lnc { flex: 1; min-width: 0; }
+
+.s-es { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--s-text3); pointer-events: none; }
+.s-eic { width: 48px; height: 48px; background: var(--s-sur2); border: 1px solid var(--s-bdr2); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+.s-eic svg { width: 22px; height: 22px; stroke-width: 1.5; color: var(--s-text3); }
+.s-et { font-size: 13px; font-weight: 700; color: var(--s-text2); }
+.s-es2 { font-size: 11px; font-family: 'JetBrains Mono', monospace; }
+
+.s-of {
+  display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+  border-top: 1px solid var(--s-bdr);
+  background: rgba(12,14,24,0.7); flex-shrink: 0;
+}
+.s-ob2 {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 6px;
+  background: none; border: 1px solid var(--s-bdr);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 10.5px; font-weight: 600; color: var(--s-text3);
+  cursor: pointer; transition: all 0.14s;
+}
+.s-ob2 svg { width: 11px; height: 11px; stroke-width: 2; }
+.s-ob2:hover { border-color: var(--s-green); color: var(--s-green); background: var(--s-gdim); }
+.s-cpb {
+  margin-left: auto; display: flex; align-items: center; gap: 5px;
+  padding: 5px 13px; border-radius: 6px;
+  background: var(--s-sur3); border: 1px solid var(--s-bdr2);
+  font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; font-weight: 700; color: var(--s-text2);
+  cursor: pointer; transition: all 0.15s;
+}
+.s-cpb svg { width: 12px; height: 12px; stroke-width: 2; }
+.s-cpb:hover { border-color: var(--s-blue); color: var(--s-blue); background: var(--s-bdim); }
+.s-cpb.ok { color: var(--s-green); border-color: var(--s-green); background: var(--s-gdim); }
+
+/* Studio statusbar */
+.s-sb {
+  display: flex; align-items: center; gap: 16px; padding: 0 14px; height: 22px;
+  background: var(--s-blue); font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,0.9); flex-shrink: 0;
+}
+.s-sbr { margin-left: auto; display: flex; gap: 16px; }
+.s-sb-item { display: flex; align-items: center; gap: 5px; }
+.s-sb-item svg { width: 11px; height: 11px; stroke-width: 2; }
+
+/* Syntax colors */
+.kw{color:#c792ea} .fn{color:#82aaff} .str{color:#c3e88d} .num{color:#f78c6c}
+.cm{color:#4a5568;font-style:italic} .tp{color:#ffcb6b} .op{color:#89ddff}
+.vr{color:#eeffff} .dc{color:#f07178}
+
+/* Modal */
+.s-ov {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.18s;
+}
+.s-ov.open { opacity: 1; pointer-events: all; }
+.s-modal {
+  background: var(--s-sur2); border: 1px solid var(--s-bdr2);
+  border-radius: 20px; padding: 22px; width: 340px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6);
+  transform: scale(0.95) translateY(-10px); transition: transform 0.2s var(--ease);
+}
+.s-ov.open .s-modal { transform: none; }
+.s-mt { font-size: 14px; font-weight: 800; margin-bottom: 14px; }
+.s-minp { width: 100%; background: var(--s-bg); border: 1px solid var(--s-bdr2); border-radius: 8px; padding: 9px 12px; font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--s-text); outline: none; }
+.s-minp:focus { border-color: var(--s-blue); box-shadow: 0 0 0 3px rgba(79,142,247,0.15); }
+.s-ma { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.s-mc { padding: 7px 14px; border-radius: 8px; background: none; border: 1px solid var(--s-bdr2); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--s-text2); cursor: pointer; }
+.s-mc:hover { background: var(--s-sur3); }
+.s-mok { padding: 7px 16px; border-radius: 8px; background: var(--s-blue); border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; font-weight: 800; color: #fff; cursor: pointer; }
+.s-mok:hover { background: #3a7de8; }
+
+/* Toasts */
+.s-ts { position: fixed; bottom: 30px; right: 14px; display: flex; flex-direction: column; gap: 7px; z-index: 9999; }
+.s-t { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--s-sur2); border: 1px solid var(--s-bdr2); box-shadow: 0 12px 32px rgba(0,0,0,0.5); font-size: 12px; font-weight: 600; min-width: 200px; animation: stIn 0.22s var(--ease); }
+@keyframes stIn { from{opacity:0;transform:translateX(16px) scale(0.96)} to{opacity:1;transform:none} }
+.s-t svg { width: 15px; height: 15px; flex-shrink: 0; }
+.s-ts { border-left-width: 3px; border-left-style: solid; }
+.s-t.s { border-left-color: var(--s-green); }
+.s-t.i { border-left-color: var(--s-blue); }
+.s-t.w { border-left-color: var(--s-amber); }
+
+/* Lbar */
+.s-lb { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(90deg, var(--s-blue), var(--s-violet), var(--s-cyan)); z-index: 9999; width: 0; transition: width 0.3s var(--ease); box-shadow: 0 0 10px var(--s-blue); }
+</style>
+</head>
+<body>
+
+<!-- ══════════ LANDING PAGE ══════════ -->
+<div id="landing">
+  <div class="mesh-bg"></div>
+  <div class="grid-lines"></div>
+
+  <!-- Floating code cards -->
+  <div class="float-cards">
+    <div class="fcard">
+      <span class="fc-kw">async def</span> <span class="fc-fn">generate_code</span>(prompt):<br>
+      &nbsp;&nbsp;<span class="fc-str">"""AI-powered code gen"""</span><br>
+      &nbsp;&nbsp;<span class="fc-kw">return</span> <span class="fc-fn">ai</span>.complete(prompt)
+    </div>
+    <div class="fcard">
+      <span class="fc-cm">// TypeScript + React</span><br>
+      <span class="fc-kw">const</span> <span class="fc-fn">App</span> = () =&gt; {<br>
+      &nbsp;&nbsp;<span class="fc-kw">return</span> &lt;<span class="fc-fn">Editor</span> lang=<span class="fc-str">"ts"</span>/&gt;<br>
+      }
+    </div>
+    <div class="fcard">
+      <span class="fc-kw">fn</span> <span class="fc-fn">solve</span>&lt;T&gt;(data: Vec&lt;T&gt;)<br>
+      &nbsp;&nbsp;-&gt; Result&lt;Vec&lt;T&gt;&gt; {<br>
+      &nbsp;&nbsp;<span class="fc-fn">Ok</span>(data.into_iter()…)<br>
+      }
+    </div>
+    <div class="fcard">
+      <span class="fc-kw">SELECT</span> u.*, COUNT(o.id)<br>
+      <span class="fc-kw">FROM</span> users u<br>
+      <span class="fc-kw">LEFT JOIN</span> orders o …<br>
+      <span class="fc-kw">GROUP BY</span> u.id
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" width="18" height="18" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="white" stroke="none"/></svg>
+      </div>
+      CodeForge
+    </a>
+    <div class="nav-links">
+      <a class="nav-link" href="#">Features</a>
+      <a class="nav-link" href="#">Languages</a>
+      <a class="nav-link" href="#">Docs</a>
+      <a class="nav-link" href="#">Pricing</a>
+    </div>
+    <a class="nav-cta" href="#" onclick="launchStudio(event)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/></svg>
+      Open Studio
+    </a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      Powered by Claude AI · 15 Languages
+    </div>
+
+    <h1 class="hero-title">
+      Describe it.<br>
+      <span class="grad">We write the code.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Transform plain English into production-ready code for any language. The IDE that thinks with you.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="launchStudio(event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor" stroke="none"/></svg>
+        Start Coding Free
+      </button>
+      <a class="btn-secondary" href="#features">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        See Features
+      </a>
+    </div>
+  </div>
+
+  <!-- Hero mockup -->
+  <div class="hero-visual">
+    <div class="mockup-frame">
+      <div class="mockup-bar">
+        <div class="mbar-dots">
+          <div class="mbar-dot"></div><div class="mbar-dot"></div><div class="mbar-dot"></div>
+        </div>
+        <div class="mbar-title">CodeForge Studio — main.py</div>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-left">
+          <div class="mock-prompt-label">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Prompt
+            <span class="mock-tag">Python</span>
+          </div>
+          <div class="mock-prompt-text">
+            Build a REST API endpoint that:<br>
+            - Validates email &amp; age fields<br>
+            - Saves to async SQLite DB<br>
+            - Returns 201 on success<br><br>
+            Include error handling and<br>
+            type annotations<span class="cursor"></span>
+          </div>
+          <div class="mock-pills">
+            <span class="mock-pill pill-blue">+ error handling</span>
+            <span class="mock-pill pill-cyan">+ type hints</span>
+            <span class="mock-pill pill-green">+ unit tests</span>
+            <span class="mock-pill pill-amber">+ docstrings</span>
+          </div>
+        </div>
+        <div class="mockup-right">
+          <div class="mr-label">
+            <div class="mr-dot"></div>
+            Output · 47 lines
+          </div>
+          <span class="fc-kw">from</span> <span class="fc-fn">dataclasses</span> <span class="fc-kw">import</span> dataclass<br>
+          <span class="fc-kw">import</span> <span class="fc-fn">aiosqlite</span>, re<br><br>
+          <span class="fc-kw">@dataclass</span><br>
+          <span class="fc-kw">class</span> <span style="color:#ffcb6b">User</span>:<br>
+          &nbsp;&nbsp;name: <span style="color:#ffcb6b">str</span><br>
+          &nbsp;&nbsp;email: <span style="color:#ffcb6b">str</span><br>
+          &nbsp;&nbsp;age: <span style="color:#ffcb6b">int</span><br><br>
+          <span class="fc-kw">async def</span> <span class="fc-fn">create_user</span>(<br>
+          &nbsp;&nbsp;payload: <span style="color:#ffcb6b">dict</span><br>
+          ) -&gt; <span style="color:#ffcb6b">User</span>:<br>
+          &nbsp;&nbsp;<span class="fc-cm"># validate &amp; persist…</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-item"><span class="stat-num">15+</span><span class="stat-label">Languages</span></div>
+    <div class="stat-item"><span class="stat-num">∞</span><span class="stat-label">Projects</span></div>
+    <div class="stat-item"><span class="stat-num">&lt;2s</span><span class="stat-label">Generation Time</span></div>
+    <div class="stat-item"><span class="stat-num">100%</span><span class="stat-label">Free to Start</span></div>
+  </div>
+</div>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section id="features">
+  <div class="section-label">
+    <span class="section-line"></span>
+    What's inside
+    <span class="section-line"></span>
+  </div>
+  <h2 class="section-title">Everything you need to<br><span class="grad">ship faster</span></h2>
+  <p class="section-sub">A full-featured IDE purpose-built for AI-assisted development.</p>
+
+  <div class="features-grid">
+
+    <!-- Wide card: language switcher -->
+    <div class="feat-card wide c-blue">
+      <div>
+        <div class="feat-icon-wrap ib">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        </div>
+        <div class="feat-title">15 Languages, One Click</div>
+        <div class="feat-desc">Switch between Python, TypeScript, Rust, Go, Swift, SQL and more instantly. The output, syntax highlighting, and file extensions all update automatically.</div>
+      </div>
+      <div class="feat-screen">
+        <div class="fs-bar"><div class="fs-dot fsd1"></div><div class="fs-dot fsd2"></div><div class="fs-dot fsd3"></div></div>
+        <div class="fs-body">
+          <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:8px;">SELECT LANGUAGE</div>
+          <div class="fs-lang-row">
+            <span class="fs-lang fsl-py">Python</span>
+            <span class="fs-lang fsl-js">JavaScript</span>
+            <span class="fs-lang fsl-ts">TypeScript</span>
+            <span class="fs-lang fsl-rs">Rust</span>
+            <span class="fs-lang fsl-go">Go</span>
+            <span class="fs-lang fsl-sw">Swift</span>
+          </div>
+          <div style="color:rgba(255,255,255,0.25);margin-top:10px;font-size:10px;">+ 9 more languages…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tall card: syntax -->
+    <div class="feat-card tall c-violet">
+      <div class="feat-icon-wrap iv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      </div>
+      <div class="feat-title">Live Syntax Highlighting</div>
+      <div class="feat-desc">Beautiful, accurate syntax coloring for every language as your code generates in real time. Line numbers, word wrap, and a full monospace experience.</div>
+      <div class="feat-screen" style="margin-top:auto; margin-top:20px;">
+        <div class="fs-bar"><div class="fs-dot fsd1"></div><div class="fs-dot fsd2"></div><div class="fs-dot fsd3"></div></div>
+        <div class="fs-body">
+          <span style="color:#c792ea">class</span> <span style="color:#ffcb6b">DataProcessor</span>:<br>
+          &nbsp;&nbsp;<span style="color:#c792ea">def</span> <span style="color:#82aaff">__init__</span>(self):<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#eeffff">self</span>._cache = {}<br>
+          &nbsp;&nbsp;<span style="color:#c792ea">async def</span> <span style="color:#82aaff">process</span>(<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;data: <span style="color:#ffcb6b">list</span><br>
+          &nbsp;&nbsp;) -> <span style="color:#ffcb6b">list</span>:<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#546e7a"># validate + transform</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#c792ea">return</span> data
+        </div>
+      </div>
+    </div>
+
+    <!-- Normal cards -->
+    <div class="feat-card c-cyan">
+      <div class="feat-icon-wrap ic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </div>
+      <div class="feat-title">File &amp; Folder Attachments</div>
+      <div class="feat-desc">Attach local files, folders, images, and URLs as context. The AI uses your existing code to generate perfectly integrated solutions.</div>
+    </div>
+
+    <div class="feat-card c-green">
+      <div class="feat-icon-wrap ig">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+      </div>
+      <div class="feat-title">Smart Context Pills</div>
+      <div class="feat-desc">One-click modifiers to append error handling, type annotations, unit tests, docstrings, async patterns, and performance hints to any prompt.</div>
+    </div>
+
+    <div class="feat-card c-amber">
+      <div class="feat-icon-wrap ia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </div>
+      <div class="feat-title">Copy, Download &amp; Run</div>
+      <div class="feat-desc">Instantly copy to clipboard, download the file with the correct extension, or run in a sandboxed environment — all from the output panel.</div>
+    </div>
+
+    <div class="feat-card c-rose">
+      <div class="feat-icon-wrap ir">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+      </div>
+      <div class="feat-title">Project Explorer</div>
+      <div class="feat-desc">Full file tree with create, open, and organize. Structure your generated code into a real project layout with folders and multiple files.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════ LANGUAGES ══════════ -->
+<section id="langs">
+  <div class="section-label">
+    <span class="section-line"></span>
+    Supported languages
+    <span class="section-line"></span>
+  </div>
+  <h2 class="section-title">Code in <span class="grad">any language</span></h2>
+  <p class="section-sub">From Python scripts to iOS apps, SQL queries to GraphQL schemas.</p>
+
+  <div class="langs-strip">
+    <div class="lang-badge"><div class="lb-dot" style="background:#3776ab"></div><span>Python</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#f7df1e"></div><span>JavaScript</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#3178c6"></div><span>TypeScript</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#ce422b"></div><span>Rust</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#00add8"></div><span>Go</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#fa7343"></div><span>Swift</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#7f52ff"></div><span>Kotlin</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#f89820"></div><span>Java</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#659ad2"></div><span>C++</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#02569b"></div><span>Flutter/Dart</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#e34f26"></div><span>HTML/CSS</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#00758f"></div><span>SQL</span></div>
+    <div class="lang-badge"><div class="lb-dot" style="background:#e535ab"></div><span>GraphQL</span></div>
+    <div class="lang-badge" style="border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.06)"><span style="color:rgba(255,255,255,0.5)">+ more</span></div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section id="cta-section">
+  <div class="cta-inner">
+    <h2 class="cta-title">Ready to build<br><span class="grad">10× faster?</span></h2>
+    <p class="cta-sub">No signup required. Start generating code in seconds.</p>
+    <button class="cta-btn" onclick="launchStudio(event)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor" stroke="none"/></svg>
+      Launch CodeForge Studio
+    </button>
+  </div>
+</section>
+
+<!-- ══════════ STUDIO ══════════ -->
+<div id="studio">
+  <div class="s-lb" id="slb"></div>
+
+  <!-- Topbar -->
+  <div class="s-top">
+    <div class="s-logo" onclick="goHome()">
+      <div class="s-logo-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="white" stroke="none"/></svg>
+      </div>
+      <span>CodeForge</span>
+    </div>
+    <div class="s-sep"></div>
+
+    <!-- Lang switcher -->
+    <div class="s-lp" id="slp">
+      <div class="s-lt" id="slt" onclick="sTogLang()">
+        <div class="ldot" id="sldot" style="background:#3776ab"></div>
+        <span id="slname">Python</span>
+        <span class="larr">▾</span>
+      </div>
+      <div class="s-lm" id="slm">
+        <div class="s-lsec">Web</div>
+        <div class="s-lrow" onclick="sPick('JavaScript','#f7df1e')"><div class="dot" style="background:#f7df1e"></div>JavaScript</div>
+        <div class="s-lrow" onclick="sPick('TypeScript','#3178c6')"><div class="dot" style="background:#3178c6"></div>TypeScript</div>
+        <div class="s-lrow" onclick="sPick('HTML/CSS','#e34f26')"><div class="dot" style="background:#e34f26"></div>HTML / CSS</div>
+        <div class="s-lsec">Backend</div>
+        <div class="s-lrow sel" onclick="sPick('Python','#3776ab')"><div class="dot" style="background:#3776ab"></div>Python</div>
+        <div class="s-lrow" onclick="sPick('Rust','#ce422b')"><div class="dot" style="background:#ce422b"></div>Rust</div>
+        <div class="s-lrow" onclick="sPick('Go','#00add8')"><div class="dot" style="background:#00add8"></div>Go</div>
+        <div class="s-lrow" onclick="sPick('Java','#f89820')"><div class="dot" style="background:#f89820"></div>Java</div>
+        <div class="s-lrow" onclick="sPick('C++','#659ad2')"><div class="dot" style="background:#659ad2"></div>C++</div>
+        <div class="s-lsec">Mobile</div>
+        <div class="s-lrow" onclick="sPick('Swift','#fa7343')"><div class="dot" style="background:#fa7343"></div>Swift</div>
+        <div class="s-lrow" onclick="sPick('Kotlin','#7f52ff')"><div class="dot" style="background:#7f52ff"></div>Kotlin</div>
+        <div class="s-lrow" onclick="sPick('Flutter','#02569b')"><div class="dot" style="background:#02569b"></div>Flutter/Dart</div>
+        <div class="s-lsec">Data</div>
+        <div class="s-lrow" onclick="sPick('SQL','#00758f')"><div class="dot" style="background:#00758f"></div>SQL</div>
+        <div class="s-lrow" onclick="sPick('GraphQL','#e535ab')"><div class="dot" style="background:#e535ab"></div>GraphQL</div>
+      </div>
+    </div>
+
+    <div class="s-tr">
+      <button class="s-tbtn" onclick="sNt('Settings coming soon','i')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/></svg>
+        Settings
+      </button>
+      <button class="s-tbtn" onclick="sDl()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="s-trun" onclick="sGen()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Generate
+      </button>
+    </div>
+  </div>
+
+  <!-- Workspace -->
+  <div class="s-work">
+
+    <!-- Sidebar -->
+    <div class="s-side">
+      <button class="s-si on" id="ssex" onclick="sTogPanel()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span class="tip">Explorer</span>
+      </button>
+      <button class="s-si" onclick="sNt('Search coming soon','i')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span class="tip">Search</span>
+      </button>
+      <button class="s-si" onclick="sNt('Git panel coming soon','i')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+        <span class="tip">Git</span>
+      </button>
+      <button class="s-si" onclick="sNt('Extensions coming soon','i')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        <span class="tip">Extensions</span>
+      </button>
+      <div class="s-sg"></div>
+      <div class="s-sl"></div>
+      <button class="s-si" onclick="goHome()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="tip">Home</span>
+      </button>
+      <button class="s-si" onclick="sTogTheme()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <span class="tip">Theme</span>
+      </button>
+    </div>
+
+    <!-- File panel -->
+    <div class="s-fp" id="sfp">
+      <div class="s-fph">
+        <span class="s-fpt">Explorer</span>
+        <div class="s-fpa">
+          <button class="s-fpab" title="New File" onclick="sOpenModal('file')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </button>
+          <button class="s-fpab" title="New Folder" onclick="sOpenModal('folder')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+          </button>
+          <button class="s-fpab" title="Refresh" onclick="sNt('Refreshed!','s')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="s-ft" id="sft"></div>
+    </div>
+
+    <!-- Editor -->
+    <div class="s-ed">
+      <div class="s-tabs" id="stabs">
+        <div class="s-tab on" data-n="prompt.md">
+          <span class="s-tmod"></span>
+          prompt.md
+          <span class="tx" onclick="sCloseTab(this,event)">×</span>
+        </div>
+        <div class="s-tab" data-n="output.py" onclick="sSwTab(this)">
+          output.py
+          <span class="tx" onclick="sCloseTab(this,event)">×</span>
+        </div>
+      </div>
+
+      <div class="s-panes" id="spanes">
+
+        <!-- Input -->
+        <div class="s-ip" id="sip">
+          <div class="s-pb">
+            <span class="s-pl">Prompt</span>
+            <span class="s-ptag" id="sptag">Python</span>
+            <div class="s-pbr">
+              <button class="s-mb" onclick="sClear()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                Clear
+              </button>
+              <button class="s-mb" onclick="sLoadEx()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                Example
+              </button>
+            </div>
+          </div>
+
+          <div class="s-ar" id="sar">
+            <button class="s-ab" onclick="sTrigFile()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Attach context
+            </button>
+          </div>
+
+          <div class="s-pw">
+            <div class="s-psc">
+              <textarea class="s-pt" id="spt" oninput="sOnType()"
+                placeholder="Describe what you want to build...
+
+Examples:
+  • A REST API with JWT authentication
+  • A recursive tree traversal algorithm
+  • An async rate-limiter with exponential backoff
+
+Be specific about inputs, outputs, edge cases, and constraints."></textarea>
+              <div class="s-cpills">
+                <button class="s-cpill" onclick="sAddCtx('Include full error handling')">+ error handling</button>
+                <button class="s-cpill" onclick="sAddCtx('Add type annotations')">+ type annotations</button>
+                <button class="s-cpill" onclick="sAddCtx('Write unit tests')">+ unit tests</button>
+                <button class="s-cpill" onclick="sAddCtx('Add docstrings')">+ docstrings</button>
+                <button class="s-cpill" onclick="sAddCtx('Make it async/await')">+ async</button>
+                <button class="s-cpill" onclick="sAddCtx('Optimize for performance')">+ optimize</button>
+              </div>
+            </div>
+
+            <div class="s-pf">
+              <button class="s-tool" onclick="sTrigFile()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span class="tip">Attach File</span>
+              </button>
+              <button class="s-tool" onclick="sNt('Folder attach coming soon','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span class="tip">Attach Folder</span>
+              </button>
+              <button class="s-tool" onclick="sInsSnip()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+                <span class="tip">Insert Snippet</span>
+              </button>
+              <button class="s-tool" onclick="sNt('Image input coming soon','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span class="tip">Attach Image</span>
+              </button>
+              <button class="s-tool" onclick="sNt('URL import coming soon','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                <span class="tip">Attach URL</span>
+              </button>
+              <div class="s-tsep"></div>
+              <button class="s-tool" onclick="sNt('Voice input coming soon','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                <span class="tip">Voice Input</span>
+              </button>
+              <button class="s-tool" onclick="sNt('Templates coming soon','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span class="tip">Templates</span>
+              </button>
+              <span class="s-cct" id="scct">0 chars</span>
+              <button class="s-gb" id="sgb" onclick="sGen()">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span id="sgtxt">Generate</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Resizer -->
+        <div class="s-sz" id="ssz"></div>
+
+        <!-- Output -->
+        <div class="s-op" id="sop">
+          <div class="s-ob">
+            <div class="s-sind">
+              <div class="s-sd" id="ssd"></div>
+              <span id="sstxt">Ready</span>
+            </div>
+            <div class="s-obr">
+              <span class="s-lct" id="slct"></span>
+              <button class="s-mb" onclick="sTogWrap()">↩ Wrap</button>
+              <button class="s-mb" onclick="sNt('Preview opened','i')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:11px;height:11px;stroke-width:2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Preview
+              </button>
+            </div>
+          </div>
+
+          <div class="s-cw" id="scw">
+            <div class="s-ci" id="sci">
+              <div class="s-es" id="ses">
+                <div class="s-eic">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                <div class="s-et">No output yet</div>
+                <div class="s-es2">Write a prompt → Generate</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="s-of">
+            <button class="s-ob2" onclick="sDl()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download
+            </button>
+            <button class="s-ob2" onclick="sOpenModal('file')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Save As
+            </button>
+            <button class="s-ob2" onclick="sNt('Running in sandbox…','i')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run
+            </button>
+            <button class="s-cpb" id="scpb" onclick="sCpy()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Copy
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="s-sb">
+    <span class="s-sb-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="11" height="11" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor" stroke="none"/></svg>
+      CodeForge Studio
+    </span>
+    <span class="s-sb-item" id="ssbL">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="11" height="11" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      Python
+    </span>
+    <span id="ssbP">Ln 1  Col 1</span>
+    <div class="s-sbr">
+      <span>UTF-8</span><span>Spaces: 2</span>
+      <span id="ssbT"></span>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="s-ov" id="sov" onclick="sOvCl(event)">
+    <div class="s-modal">
+      <div class="s-mt" id="smtitle">New File</div>
+      <input class="s-minp" id="sminp" placeholder="filename.py"/>
+      <div class="s-ma">
+        <button class="s-mc" onclick="sCloseModal()">Cancel</button>
+        <button class="s-mok" onclick="sConfModal()">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="s-ts" id="sts"></div>
+<input type="file" id="sfi" style="display:none" multiple onchange="sOnFA(event)">
+
+<script>
+// ── LAUNCH / HOME ──
+function launchStudio(e) {
+  if(e) e.preventDefault();
+  document.getElementById('landing').style.display = 'none';
+  document.getElementById('studio').classList.add('active');
+  sNt('Welcome to CodeForge Studio!', 's');
+}
+function goHome() {
+  document.getElementById('studio').classList.remove('active');
+  document.getElementById('landing').style.display = '';
+}
+
+// ── STUDIO STATE ──
+let sLang='Python', sLC='#3776ab', sRaw='', sWW=false, sPO=true, sMT='file';
+let sTree=[{t:'folder',n:'my-project',o:true,c:[
+  {t:'folder',n:'src',o:true,c:[
+    {t:'file',n:'main.py',a:true},{t:'file',n:'utils.py'},{t:'file',n:'config.py'}
+  ]},
+  {t:'folder',n:'tests',o:false,c:[{t:'file',n:'test_main.py'}]},
+  {t:'file',n:'README.md'},{t:'file',n:'requirements.txt'}
+]}];
+
+// clock
+const sT=()=>document.getElementById('ssbT').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+sT();setInterval(sT,1000);
+
+// lang
+function sTogLang(){document.getElementById('slt').classList.toggle('open');document.getElementById('slm').classList.toggle('open');}
+document.addEventListener('click',e=>{if(!document.getElementById('slp').contains(e.target)){document.getElementById('slt').classList.remove('open');document.getElementById('slm').classList.remove('open');}});
+function sPick(n,c){
+  sLang=n;sLC=c;
+  document.getElementById('slname').textContent=n;
+  document.getElementById('sldot').style.background=c;
+  document.getElementById('sptag').textContent=n;
+  document.getElementById('ssbL').innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="11" height="11" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> ${n}`;
+  document.querySelectorAll('.s-lrow').forEach(r=>r.classList.toggle('sel',r.textContent.trim()===n));
+  sTogLang();
+  const ext=sExt(n);
+  const ot=document.querySelector('.s-tab[data-n^="output"]');
+  if(ot){ot.dataset.n='output.'+ext;ot.innerHTML='output.'+ext+'<span class="tx" onclick="sCloseTab(this,event)">×</span>';}
+  sNt('Language → '+n,'s');
+}
+function sExt(n){return{Python:'py',JavaScript:'js',TypeScript:'ts','HTML/CSS':'html',Rust:'rs',Go:'go',Java:'java','C++':'cpp',Swift:'swift',Kotlin:'kt',Flutter:'dart',SQL:'sql',GraphQL:'graphql'}[n]||'txt';}
+
+// panel
+function sTogPanel(){sPO=!sPO;document.getElementById('sfp').classList.toggle('closed',!sPO);document.getElementById('ssex').classList.toggle('on',sPO);}
+
+// tree
+function sRenderTree(){document.getElementById('sft').innerHTML=sRN(sTree,0);}
+function sRN(ns,d){return ns.map(n=>{
+  if(n.t==='folder'){const ch=n.o?'<div>'+sRN(n.c||[],d+1)+'</div>':'';
+    return`<div class="s-frow" style="padding-left:${8+d*14}px" onclick="sTF(this,'${n.n}')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      ${n.n}</div>${ch}`;}
+  return`<div class="s-frow${n.a?' active':''}" style="padding-left:${22+d*14}px" onclick="sOF(this,'${n.n}')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    ${n.n}</div>`;
+}).join('');}
+function sTF(el,n){const f=ns=>{for(let x of ns){if(x.t==='folder'&&x.n===n){x.o=!x.o;return true;}if(x.c&&f(x.c))return true;}};f(sTree);sRenderTree();}
+function sOF(el,n){document.querySelectorAll('.s-frow').forEach(r=>r.classList.remove('active'));el.classList.add('active');sNt('Opened '+n,'i');}
+sRenderTree();
+
+// tabs
+function sSwTab(el){document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
+function sCloseTab(x,e){e.stopPropagation();const t=x.closest('.s-tab'),b=document.getElementById('stabs');if(b.querySelectorAll('.s-tab').length>1){t.remove();const r=b.querySelector('.s-tab');if(r)r.classList.add('on');}else sNt("Can't close last tab",'w');}
+
+function sOnType(){
+  const v=document.getElementById('spt').value;
+  document.getElementById('scct').textContent=v.length+' chars';
+  const ta=document.getElementById('spt'),pos=ta.selectionStart,bef=v.slice(0,pos).split('\n');
+  document.getElementById('ssbP').textContent=`Ln ${bef.length}  Col ${bef[bef.length-1].length+1}`;
+}
+function sAddCtx(t){const ta=document.getElementById('spt');const v=ta.value;ta.value=v+(v&&!v.endsWith('\n')?'\n':'')+t;ta.focus();sOnType();}
+function sInsSnip(){
+  const s={Python:'def solve(data: list) -> list:\n    """Process input."""\n    if not data:\n        raise ValueError("Empty input")\n    return [x for x in data]',JavaScript:'async function solve(data) {\n  if (!data?.length) throw new Error("Empty");\n  return data.map(x => x);\n}'};
+  const ta=document.getElementById('spt'),pos=ta.selectionStart;
+  ta.value=ta.value.slice(0,pos)+(s[sLang]||'// snippet')+ta.value.slice(pos);sOnType();sNt('Snippet inserted','s');
+}
+
+// file
+function sTrigFile(){document.getElementById('sfi').click();}
+function sOnFA(e){Array.from(e.target.files).forEach(f=>{const r=document.getElementById('sar'),c=document.createElement('div');c.className='s-chip';c.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> ${f.name}<span class="s-cx" onclick="this.parentElement.remove()">×</span>`;r.insertBefore(c,r.lastElementChild);sNt(f.name+' attached','s');});e.target.value='';}
+
+function sLoadEx(){
+  const ex={Python:`Build a REST API endpoint that:
+- Accepts POST /users with JSON body {name, email, age}
+- Validates all required fields (return 400 if missing)
+- Validates email format with regex
+- Saves to SQLite using aiosqlite
+- Returns 201 with the created record
+
+Include type annotations, error handling, and logging.`,JavaScript:`Create an async paginator function that:
+- Fetches paginated data from a given API URL
+- Handles rate limiting with exponential backoff (max 5 retries)
+- Merges all pages into one results array
+- Uses modern ES2022+ and JSDoc comments`};
+  document.getElementById('spt').value=ex[sLang]||ex.Python;sOnType();sNt('Example loaded','s');
+}
+
+// generate
+const SCODE={
+Python:p=>`<span class="cm"># CodeForge Studio — Python 3.12</span>
+<span class="cm"># Prompt: ${p.slice(0,55).replace(/\n/g,' ')}...</span>
+
+<span class="kw">from</span> <span class="vr">__future__</span> <span class="kw">import</span> <span class="vr">annotations</span>
+<span class="kw">import</span> <span class="vr">asyncio</span>, <span class="vr">logging</span>, <span class="vr">re</span>
+<span class="kw">from</span> <span class="vr">dataclasses</span> <span class="kw">import</span> <span class="vr">dataclass</span>, <span class="vr">field</span>
+<span class="kw">from</span> <span class="vr">datetime</span> <span class="kw">import</span> <span class="vr">datetime</span>, <span class="vr">timezone</span>
+<span class="kw">from</span> <span class="vr">typing</span> <span class="kw">import</span> <span class="tp">Any</span>
+
+<span class="vr">log</span> <span class="op">=</span> <span class="vr">logging</span>.<span class="fn">getLogger</span>(<span class="vr">__name__</span>)
+<span class="dc">EMAIL_RE</span> <span class="op">=</span> <span class="vr">re</span>.<span class="fn">compile</span>(<span class="str">r"^[\w.+-]+@[\w-]+\.[\w.]+$"</span>)
+
+
+<span class="dc">@dataclass</span>
+<span class="kw">class</span> <span class="tp">User</span>:
+    <span class="vr">name</span><span class="op">:</span> <span class="tp">str</span>
+    <span class="vr">email</span><span class="op">:</span> <span class="tp">str</span>
+    <span class="vr">age</span><span class="op">:</span> <span class="tp">int</span>
+    <span class="vr">id</span><span class="op">:</span> <span class="tp">int</span> <span class="op">=</span> <span class="vr">field</span>(<span class="vr">default</span><span class="op">=</span><span class="num">0</span>)
+    <span class="vr">created_at</span><span class="op">:</span> <span class="tp">datetime</span> <span class="op">=</span> <span class="vr">field</span>(
+        <span class="vr">default_factory</span><span class="op">=</span><span class="kw">lambda</span><span class="op">:</span> <span class="vr">datetime</span>.<span class="fn">now</span>(<span class="vr">timezone</span>.<span class="op">utc</span>)
+    )
+
+
+<span class="kw">class</span> <span class="tp">ValidationError</span>(<span class="tp">ValueError</span>):
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="vr">self</span>, <span class="vr">f</span><span class="op">:</span> <span class="tp">str</span>, <span class="vr">msg</span><span class="op">:</span> <span class="tp">str</span>) <span class="op">-></span> <span class="kw">None</span>:
+        <span class="fn">super</span>().<span class="fn">__init__</span>(<span class="str">f"{f}: {msg}"</span>)
+        <span class="vr">self</span>.<span class="vr">field</span> <span class="op">=</span> <span class="vr">f</span>
+
+
+<span class="kw">class</span> <span class="tp">UserService</span>:
+    <span class="str">"""Async user service with SQLite persistence."""</span>
+
+    <span class="kw">def</span> <span class="fn">__init__</span>(<span class="vr">self</span>, <span class="vr">db</span><span class="op">:</span> <span class="tp">str</span> <span class="op">=</span> <span class="str">"users.db"</span>) <span class="op">-></span> <span class="kw">None</span>:
+        <span class="vr">self</span>.<span class="vr">db_path</span> <span class="op">=</span> <span class="vr">db</span>
+        <span class="vr">self</span>.<span class="vr">_conn</span><span class="op">:</span> <span class="tp">Any</span> <span class="op">=</span> <span class="kw">None</span>
+
+    <span class="kw">async def</span> <span class="fn">startup</span>(<span class="vr">self</span>) <span class="op">-></span> <span class="kw">None</span>:
+        <span class="kw">import</span> <span class="vr">aiosqlite</span>
+        <span class="vr">self</span>.<span class="vr">_conn</span> <span class="op">=</span> <span class="kw">await</span> <span class="vr">aiosqlite</span>.<span class="fn">connect</span>(<span class="vr">self</span>.<span class="vr">db_path</span>)
+        <span class="kw">await</span> <span class="vr">self</span>.<span class="vr">_conn</span>.<span class="fn">execute</span>(<span class="str">"""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE,
+                age INTEGER NOT NULL,
+                created_at TEXT NOT NULL
+            )"""</span>)
+        <span class="kw">await</span> <span class="vr">self</span>.<span class="vr">_conn</span>.<span class="fn">commit</span>()
+
+    <span class="kw">async def</span> <span class="fn">create_user</span>(<span class="vr">self</span>, <span class="vr">payload</span><span class="op">:</span> <span class="tp">dict</span>) <span class="op">-></span> <span class="tp">User</span>:
+        <span class="vr">user</span> <span class="op">=</span> <span class="vr">self</span>.<span class="fn">_validate</span>(<span class="vr">payload</span>)
+        <span class="kw">async with</span> <span class="vr">self</span>.<span class="vr">_conn</span>.<span class="fn">execute</span>(
+            <span class="str">"INSERT INTO users (name,email,age,created_at) VALUES (?,?,?,?)"</span>,
+            (<span class="vr">user</span>.<span class="vr">name</span>, <span class="vr">user</span>.<span class="vr">email</span>, <span class="vr">user</span>.<span class="vr">age</span>, <span class="vr">user</span>.<span class="vr">created_at</span>.<span class="fn">isoformat</span>()),
+        ) <span class="kw">as</span> <span class="vr">cur</span>:
+            <span class="vr">user</span>.<span class="vr">id</span> <span class="op">=</span> <span class="vr">cur</span>.<span class="vr">lastrowid</span>
+        <span class="kw">await</span> <span class="vr">self</span>.<span class="vr">_conn</span>.<span class="fn">commit</span>()
+        <span class="vr">log</span>.<span class="fn">info</span>(<span class="str">"Created user id=%d"</span>, <span class="vr">user</span>.<span class="vr">id</span>)
+        <span class="kw">return</span> <span class="vr">user</span>
+
+    <span class="kw">def</span> <span class="fn">_validate</span>(<span class="vr">self</span>, <span class="vr">d</span><span class="op">:</span> <span class="tp">dict</span>) <span class="op">-></span> <span class="tp">User</span>:
+        <span class="kw">for</span> <span class="vr">k</span> <span class="kw">in</span> (<span class="str">"name"</span>, <span class="str">"email"</span>, <span class="str">"age"</span>):
+            <span class="kw">if</span> <span class="vr">k</span> <span class="kw">not in</span> <span class="vr">d</span>:
+                <span class="kw">raise</span> <span class="tp">ValidationError</span>(<span class="vr">k</span>, <span class="str">"required"</span>)
+        <span class="kw">if not</span> <span class="dc">EMAIL_RE</span>.<span class="fn">match</span>(<span class="vr">d</span>[<span class="str">"email"</span>]):
+            <span class="kw">raise</span> <span class="tp">ValidationError</span>(<span class="str">"email"</span>, <span class="str">"invalid format"</span>)
+        <span class="kw">if not</span> (<span class="fn">isinstance</span>(<span class="vr">d</span>[<span class="str">"age"</span>], <span class="tp">int</span>) <span class="kw">and</span> <span class="num">0</span> <span class="op">&lt;</span> <span class="vr">d</span>[<span class="str">"age"</span>] <span class="op">&lt;</span> <span class="num">150</span>):
+            <span class="kw">raise</span> <span class="tp">ValidationError</span>(<span class="str">"age"</span>, <span class="str">"must be 1-149"</span>)
+        <span class="kw">return</span> <span class="tp">User</span>(<span class="vr">name</span><span class="op">=</span><span class="vr">d</span>[<span class="str">"name"</span>].<span class="fn">strip</span>(), <span class="vr">email</span><span class="op">=</span><span class="vr">d</span>[<span class="str">"email"</span>].<span class="fn">lower</span>(), <span class="vr">age</span><span class="op">=</span><span class="vr">d</span>[<span class="str">"age"</span>])`,
+
+JavaScript:p=>`<span class="cm">// CodeForge Studio — JavaScript ES2022+</span>
+<span class="cm">// Prompt: ${p.slice(0,55).replace(/\n/g,' ')}...</span>
+<span class="cm">"use strict";</span>
+
+<span class="kw">const</span> <span class="dc">DEFAULTS</span> <span class="op">=</span> { <span class="vr">pageSize</span><span class="op">:</span> <span class="num">50</span>, <span class="vr">maxRetries</span><span class="op">:</span> <span class="num">5</span>, <span class="vr">baseDelay</span><span class="op">:</span> <span class="num">500</span>, <span class="vr">headers</span><span class="op">:</span> {} };
+
+<span class="cm">/**
+ * Fetch all pages from a paginated REST API.
+ * @param {string} baseUrl
+ * @param {object} opts
+ * @returns {Promise&lt;unknown[]&gt;}
+ */</span>
+<span class="kw">export async function</span> <span class="fn">fetchAll</span>(<span class="vr">baseUrl</span>, <span class="vr">opts</span> <span class="op">=</span> {}) {
+  <span class="kw">const</span> { <span class="vr">pageSize</span>, <span class="vr">maxRetries</span>, <span class="vr">baseDelay</span>, <span class="vr">headers</span> } <span class="op">=</span> { ...<span class="dc">DEFAULTS</span>, ...<span class="vr">opts</span> };
+  <span class="kw">const</span> <span class="vr">results</span> <span class="op">=</span> [];
+  <span class="kw">let</span> <span class="vr">page</span> <span class="op">=</span> <span class="num">1</span>, <span class="vr">more</span> <span class="op">=</span> <span class="kw">true</span>;
+
+  <span class="kw">while</span> (<span class="vr">more</span>) {
+    <span class="kw">const</span> <span class="vr">url</span> <span class="op">=</span> <span class="str">\`\${baseUrl}?page=\${page}&limit=\${pageSize}\`</span>;
+    <span class="kw">const</span> <span class="vr">data</span> <span class="op">=</span> <span class="kw">await</span> <span class="fn">retry</span>(<span class="vr">url</span>, <span class="vr">headers</span>, <span class="vr">maxRetries</span>, <span class="vr">baseDelay</span>);
+    <span class="kw">if</span> (<span class="op">!</span><span class="vr">data</span>.<span class="vr">items</span><span class="op">?.</span><span class="vr">length</span>) { <span class="vr">more</span> <span class="op">=</span> <span class="kw">false</span>; <span class="kw">break</span>; }
+    <span class="vr">results</span>.<span class="fn">push</span>(...<span class="vr">data</span>.<span class="vr">items</span>);
+    <span class="vr">more</span> <span class="op">=</span> <span class="vr">data</span>.<span class="vr">hasNextPage</span> <span class="op">??</span> <span class="vr">data</span>.<span class="vr">items</span>.<span class="vr">length</span> <span class="op">===</span> <span class="vr">pageSize</span>;
+    <span class="vr">page</span><span class="op">++</span>;
+  }
+  <span class="kw">return</span> <span class="vr">results</span>;
+}
+
+<span class="kw">async function</span> <span class="fn">retry</span>(<span class="vr">url</span>, <span class="vr">headers</span>, <span class="vr">tries</span>, <span class="vr">delay</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">i</span> <span class="op">=</span> <span class="num">0</span>; <span class="vr">i</span> <span class="op">&lt;=</span> <span class="vr">tries</span>; <span class="vr">i</span><span class="op">++</span>) {
+    <span class="kw">const</span> <span class="vr">res</span> <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="vr">url</span>, { <span class="vr">headers</span> });
+    <span class="kw">if</span> (<span class="vr">res</span>.<span class="vr">status</span> <span class="op">===</span> <span class="num">429</span> <span class="op">||</span> <span class="vr">res</span>.<span class="vr">status</span> <span class="op">&gt;=</span> <span class="num">500</span>) {
+      <span class="kw">if</span> (<span class="vr">i</span> <span class="op">===</span> <span class="vr">tries</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">\`HTTP \${res.status} after \${tries} retries\`</span>);
+      <span class="kw">await</span> <span class="kw">new</span> <span class="tp">Promise</span>(<span class="vr">r</span> <span class="op">=></span> <span class="fn">setTimeout</span>(<span class="vr">r</span>, <span class="vr">delay</span> <span class="op">*</span> <span class="num">2</span> <span class="op">**</span> <span class="vr">i</span>));
+      <span class="kw">continue</span>;
+    }
+    <span class="kw">if</span> (<span class="op">!</span><span class="vr">res</span>.<span class="vr">ok</span>) <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">\`HTTP \${res.status}\`</span>);
+    <span class="kw">return</span> <span class="vr">res</span>.<span class="fn">json</span>();
+  }
+}`,
+
+fallback:(l,p)=>`<span class="cm">// CodeForge Studio — ${l}</span>
+<span class="cm">// Prompt: ${p.slice(0,55).replace(/\n/g,' ')}...</span>
+
+<span class="kw">class</span> <span class="tp">Solution</span> {
+  <span class="fn">solve</span>(<span class="vr">input</span>) {
+    <span class="kw">throw new</span> <span class="tp">Error</span>(<span class="str">"Not implemented"</span>);
+  }
+}`
+};
+
+function sLB(p){document.getElementById('slb').style.width=p+'%';}
+
+function sGen(){
+  const p=document.getElementById('spt').value.trim();
+  if(!p){sNt('Write a prompt first!','w');document.getElementById('spt').focus();return;}
+  const b=document.getElementById('sgb'),t=document.getElementById('sgtxt');
+  const sd=document.getElementById('ssd'),st=document.getElementById('sstxt');
+  b.classList.add('busy');t.textContent='Generating…';
+  sd.className='s-sd run';st.textContent='Generating…';
+  document.getElementById('ses').style.display='none';
+  sLB(30);
+  const ci=document.getElementById('sci');
+  ci.innerHTML='<div style="color:#3d4a65;font-family:JetBrains Mono,monospace;font-size:12px;padding:4px 0;animation:sBl 0.9s infinite">● Processing…</div>';
+  setTimeout(()=>sLB(70),600);
+  setTimeout(()=>{
+    sLB(100);
+    const html=SCODE[sLang]?SCODE[sLang](p):SCODE.fallback(sLang,p);
+    sRaw=html.replace(/<[^>]+>/g,'');
+    const lines=sRaw.split('\n');
+    ci.innerHTML=`<div class="s-lnw"><div class="s-lnn">${lines.map((_,i)=>i+1).join('<br>')}</div><div class="s-lnc"><pre style="white-space:pre">${html}</pre></div></div>`;
+    document.getElementById('slct').textContent=lines.length+' lines';
+    sd.className='s-sd rdy';st.textContent='Ready';
+    b.classList.remove('busy');t.textContent='Generate';
+    setTimeout(()=>sLB(0),300);
+    sNt('Code generated!','s');
+    sAddOutTab();
+  },1500);
+}
+
+function sAddOutTab(){
+  const ext=sExt(sLang),name='output.'+ext,bar=document.getElementById('stabs');
+  if(![...bar.querySelectorAll('.s-tab')].find(t=>t.dataset.n===name)){
+    const t=document.createElement('div');t.className='s-tab';t.dataset.n=name;
+    t.innerHTML=name+'<span class="tx" onclick="sCloseTab(this,event)">×</span>';
+    t.onclick=function(){sSwTab(this);};bar.appendChild(t);
+  }
+}
+
+function sCpy(){
+  if(!sRaw){sNt('Nothing to copy!','w');return;}
+  navigator.clipboard.writeText(sRaw).then(()=>{
+    const b=document.getElementById('scpb');b.classList.add('ok');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;stroke-width:2.5"><polyline points="20 6 9 17 4 12"/></svg> Copied!';
+    setTimeout(()=>{b.classList.remove('ok');b.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:12px;height:12px;stroke-width:2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';},2200);
+  });
+}
+function sDl(){
+  if(!sRaw){sNt('Nothing to download!','w');return;}
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([sRaw],{type:'text/plain'})),download:'output.'+sExt(sLang)});
+  a.click();sNt('Downloaded!','s');
+}
+function sClear(){
+  document.getElementById('spt').value='';sOnType();
+  document.getElementById('sci').innerHTML='<div class="s-es" id="ses"><div class="s-eic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="s-et">No output yet</div><div class="s-es2">Write a prompt → Generate</div></div>';
+  sRaw='';document.getElementById('ssd').className='s-sd';document.getElementById('sstxt').textContent='Ready';document.getElementById('slct').textContent='';
+}
+function sTogWrap(){sWW=!sWW;const p=document.querySelector('.s-lnc pre');if(p)p.style.whiteSpace=sWW?'pre-wrap':'pre';sNt('Word wrap '+(sWW?'on':'off'),'i');}
+
+// modal
+function sOpenModal(t){sMT=t;document.getElementById('smtitle').textContent=t==='file'?'New File':'New Folder';document.getElementById('sminp').placeholder=t==='file'?'filename.py':'folder-name';document.getElementById('sminp').value='';document.getElementById('sov').classList.add('open');setTimeout(()=>document.getElementById('sminp').focus(),120);}
+function sCloseModal(){document.getElementById('sov').classList.remove('open');}
+function sOvCl(e){if(e.target===document.getElementById('sov'))sCloseModal();}
+function sConfModal(){
+  const n=document.getElementById('sminp').value.trim();if(!n)return;
+  if(sMT==='file'){sTree[0].c.unshift({t:'file',n});sNt('Created '+n,'s');}
+  else{sTree[0].c.unshift({t:'folder',n,o:false,c:[]});sNt('Created '+n+'/','s');}
+  sRenderTree();sCloseModal();
+}
+document.getElementById('sminp').addEventListener('keydown',e=>{if(e.key==='Enter')sConfModal();if(e.key==='Escape')sCloseModal();});
+
+// theme
+let sLight=false;
+function sTogTheme(){
+  sLight=!sLight;
+  document.getElementById('studio').style.filter=sLight?'invert(1) hue-rotate(180deg)':'';
+  sNt(sLight?'Light mode':'Dark mode','i');
+}
+
+// resizer
+let sSz=false;
+const ssiz=document.getElementById('ssz');
+ssiz.addEventListener('mousedown',()=>{sSz=true;ssiz.classList.add('drag');document.body.style.cssText='cursor:col-resize;user-select:none';});
+document.addEventListener('mousemove',e=>{
+  if(!sSz)return;
+  const pn=document.getElementById('spanes'),r=pn.getBoundingClientRect();
+  const pct=Math.max(25,Math.min(75,((e.clientX-r.left)/r.width)*100));
+  document.getElementById('sip').style.cssText=`flex:none;width:${pct}%`;
+  document.getElementById('sop').style.width=(100-pct-0.2)+'%';
+});
+document.addEventListener('mouseup',()=>{sSz=false;ssiz.classList.remove('drag');document.body.style.cssText='';});
+
+// toasts
+function sNt(msg,type='i'){
+  const s=document.getElementById('sts');
+  const el=document.createElement('div');el.className='s-t '+type;
+  const icons={s:'<svg viewBox="0 0 24 24" fill="none" stroke="#34d399" style="width:15px;height:15px;stroke-width:2.5;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>',i:'<svg viewBox="0 0 24 24" fill="none" stroke="#4f8ef7" style="width:15px;height:15px;stroke-width:2;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',w:'<svg viewBox="0 0 24 24" fill="none" stroke="#fbbf24" style="width:15px;height:15px;stroke-width:2;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>'};
+  el.innerHTML=(icons[type]||icons.i)+`<span>${msg}</span>`;
+  s.appendChild(el);
+  setTimeout(()=>{el.style.cssText='opacity:0;transition:opacity 0.28s';setTimeout(()=>el.remove(),300);},3000);
+}
+
+// keyboard
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();sGen();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();sClear();}
+  if(e.key==='Escape')sCloseModal();
+});
+</script>
+</body>
+</html>
